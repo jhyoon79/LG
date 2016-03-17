@@ -1,0 +1,39 @@
+3000	: number of particles
+13000   1   1  : number of steps, how often to output, how often to output snap
+1.  	 : timestep(Myr)
+5683 : number of subhalos
+
+
+
+
+=== for 1.0 Myr timestep ===
+3400   1   10  : number of steps, how often to output, how often to output snap
+1.0 	 : timestep(Myr)
+=== for 0.5 Myr timestep ===
+6800   2   20  : number of steps, how often to output, how often to output snap
+0.5 	 : timestep(Myr)
+=== for 0.25 Myr timestep ===
+13600   4   40  : number of steps, how often to output, how often to output snap
+0.25 	 : timestep(Myr)
+=== for 0.1 Myr timestep ===
+30600   10   100  : number of steps, how often to output, how often to output snap
+0.1 	 : timestep(Myr)
+=== for 0.05 Myr timestep ===
+61200   20   200  : number of steps, how often to output, how often to output snap
+0.05 	 : timestep(Myr)
+=== for 0.01 Myr timestep ===
+306000   100   1000  : number of steps, how often to output, how often to output snap
+0.01 	 : timestep(Myr)
+=== for 0.005 Myr timestep ===
+612000   200   2000  : number of steps, how often to output, how often to output snap
+0.005 	 : timestep(Myr)
+=== for 0.0025 Myr timestep ===
+1224000   400   4000  : number of steps, how often to output, how often to output snap
+0.0025 	 : timestep(Myr)
+=== for 0.001 Myr timestep ===
+3060000   1000   10000  : number of steps, how often to output, how often to output snap
+0.001 	 : timestep(Myr)
+
+
+c19598   : number of subhalos of BI5
+

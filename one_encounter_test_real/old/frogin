@@ -1,0 +1,6 @@
+3000	: number of particles
+6000   2   2  : number of steps, how often to output, how often to output snap
+0.5 	 : timestep(Myr)
+1 : number of subhalos
+
+

@@ -1,0 +1,4 @@
+401 	: number of particles
+3060   1   10  : number of steps, how often to output, how often to output snap
+1.e0 	 : timestep(Myr)
+

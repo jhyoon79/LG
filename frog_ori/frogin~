@@ -1,0 +1,4 @@
+2			: number of particles
+1000 10			: number of steps, how often to output
+0.01			: timestep
+

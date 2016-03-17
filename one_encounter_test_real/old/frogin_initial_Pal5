@@ -1,0 +1,10 @@
+1 	 	: number of particles
+3400  1   : number of steps, how often to output
+-1	 : timestep(Myr)
+
+
+
+32000  10   : number of steps, how often to output
+-0.1	 : timestep(Myr)
+
+

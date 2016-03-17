@@ -1,0 +1,138 @@
+FUNCTION v_vector, x_t, y_t, z_t, Vr, Vt, phi=phi
+;=== Sun position ini xyz Galactic plane ===
+x_sun = -8.d
+y_sun = 0.d
+z_sun = 0.d
+phi = phi*!dtor
+
+d_3D = sqrt((x_t-x_sun)^2.+(y_t-y_sun)^2.+(z_t-z_sun)^2.)
+d_xy = sqrt((x_t-x_sun)^2.+(y_t-y_sun)^2.)
+Vr_x = Vr * (x_t-x_sun) / d_3D
+Vr_y = Vr * y_t / d_3D
+Vr_z = Vr * z_t / d_3D
+Vt_x = -Vt*sin(phi) * y_t / d_xy
+Vt_y = Vt*sin(phi) * (x_t-x_sun) / d_xy
+Vt_z = Vt*cos(phi)
+V_x = Vr_x + Vt_x
+V_y = Vr_y + Vt_y
+V_z = Vr_z + Vt_z
+
+RETURN, [V_x, V_y, V_z]
+END
+
+
+; Vr&Vt viewed at the Galactic center
+FUNCTION Vtan,x,y,z,Vx,Vy,Vz
+
+dot = x*Vx+y*Vy+z*Vz
+r = sqrt(x^2.+y^2.+z^2.)
+V = sqrt(Vx^2.+Vy^2.+Vz^2.)
+cos_theta = dot/(r*V)
+Vr = V*cos_theta
+Vrx = Vr*x/r
+Vry = Vr*y/r
+Vrz = Vr*z/r
+print,'Vr',Vr,sqrt(Vrx^2.+Vry^2.+Vrz^2.)
+Vtx = Vx-Vrx
+Vty = Vy-Vry
+Vtz = Vz-Vrz
+
+RETURN,[Vrx,Vry,Vrz,Vtx,Vty,Vtz]
+END
+
+
+pro make_pal5
+
+;=== print out starting time ===
+openw,31,'time_start'
+printf,31,systime(1)
+close,31
+
+readcol, 'Pal5_initial', t, x_init, y_init, z_init, Vx_init, Vy_init, Vz_init
+openr, 99, 'frogin'
+readf, 99, N_stars
+close, 99
+N_stars = N_stars - 1
+G = 4.3d-6
+
+chr_rdtbl,'/scratch/jhyoon/Research/LG/realistic/part_peri_nosub',0,arr,/silent
+arr = double(arr)
+R_peri = sqrt(arr[1,0]^2.+arr[2,0]^2.+arr[3,0]^2.)
+openw,8,'R_peri'
+print , 'R_peri=',R_peri
+printf,8,R_peri
+
+;=== make bar like Pal5 ===
+r_tide = 0.108653d
+;sigma_r = r_tide/0.2	; for the encounter test
+sigma_r = r_tide/0.9;/0.4
+sph_coord = cv_coord(from_rect=[x_init,y_init,z_init],/to_sphere)
+longitude = randomn(39,N_stars)*0.000 + sph_coord[0]
+latitude = randomn(29,N_stars)*0.000 + sph_coord[1]
+
+alpha = 3
+mperi = 2.9179163d10
+rperi = 7.3277549d
+mapo = 1.2749110d11
+rapo =18.884467d
+s = (10000./mperi)^(1./3.)
+;Vt = 89d
+;Vr = 0d
+VrVt = Vtan(x_init,y_init,z_init,Vx_init[0],Vy_init[0],Vz_init[0])
+Vt = sqrt(total(VrVt[3:5]^2. ))
+vperi = 226d
+vapo = 88d
+dv = alpha*s*((mperi*rapo/(rperi*mapo)-rperi*vperi/(rapo*vapo))/(vapo^2.*rapo/(G*mapo)-1.))*vapo
+
+alpha = 0.5
+beta = 3.5
+jay = s*rperi*vperi
+dr = rapo*s*(alpha*G*mperi/rperi-beta*vapo^2.)/(G*mapo/rapo-vapo^2.)
+dv = (beta*jay-vapo*dr)/rapo
+dr = 0.168
+dv = 0.4891
+
+;dr = [-1.*replicate(dr,N_stars/2+1),replicate(dr,N_stars/2)]
+;dv = [-1.*replicate(dv,N_stars/2+1),replicate(dv,N_stars/2)]
+;print,dvx,dvy,dvz
+;dv = ((mperi*rapo/(rperi*mapo)-rperi*vperi/(rapo*vapo))/(vapo^2.*rapo/(G*mapo)-1.))
+
+;=== for the encounter test ===
+radial_out = randomu(19,N_stars/2)*sigma_r+r_tide*0.3+sph_coord[2]
+radial_in = -1.*(randomu(9,N_stars/2+1))*sigma_r-r_tide*0.3+sph_coord[2]
+radial = [radial_in,radial_out]
+print,'dr=',dr,'   dv=',dv
+input_arr = transpose([[longitude],[latitude],[radial]])
+rect_coord = cv_coord(from_sphere=input_arr,/to_rect)
+x_stars = rect_coord[0,*]
+y_stars = rect_coord[1,*]
+z_stars = rect_coord[2,*]
+help,input_arr,rect_coord,longitude
+
+gradR = (sqrt(x_init[0]^2.+y_init[0]^2.+z_init[0]^2.)-radial)
+gradR = -1*gradR/max(abs(gradR))
+dr = dr*gradR
+dv = dv*gradR
+
+V = sqrt(Vx_init[0]^2.+Vy_init[0]^2.+Vz_init[0]^2.)
+dvx = dv*Vx_init[0]/V
+dvy = dv*Vy_init[0]/V
+dvz = dv*Vz_init[0]/V
+
+radial = radial + dr
+sigma_v = 0.;0.15
+Vx_stars = (randomn(91,N_stars)*sigma_v + Vx_init[0])+dvx
+Vy_stars = (randomn(82,N_stars)*sigma_v + Vy_init[0])+dvy
+Vz_stars = (randomn(73,N_stars)*sigma_v + Vz_init[0])+dvz
+v2 = sqrt(Vx_stars^2.+Vy_stars^2.+Vz_stars^2.)
+
+openw, 2, 'Pal5_sigma.dat'
+printf, 2, sigma_v, sigma_r
+close, 2
+
+openw, 1, 'frog_Pal5.dat'
+printf, 1, x_init, y_init, z_init, Vx_init, Vy_init, Vz_init, f='(6(f15.9,1x))'
+for i=0L,N_stars-1 do printf, 1, x_stars[i], y_stars[i], z_stars[i], Vx_stars[i], Vy_stars[i], Vz_stars[i], f='(6(f15.9,1x))'
+close, 1
+
+END

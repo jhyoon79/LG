@@ -1,0 +1,67 @@
+To run it, symply execute run_all.sh (type "./run_all.sh" in a linux terminal)
+Please be careful about PATH.
+
+All output files are in ASCII types which occupy quite a lot of your disk space.
+You may want to change it if you plan to run many simulation with different condition.
+
+
+*** Description of the steps
+
+1) make_initial_Pal5.idl
+
+This converts the radial and tangential velocity of Pal 5 to Vx, Vy, Vz in cartesian coordinates. 
+
+
+2) compile and run frog_initial_Pal5.f
+
+This gives you the position of Pal 5 "N" Myrs ago.
+You can set "N" in the line 2 of 'frogin_initial_Pal5'. It's currently 8440 which means it computes the position of Pal 5 8440 Myr ago. The timestep -1 tells you this code steps backward (to the past).
+
+
+3) compile and run frog_central.f
+
+This step evolves Pal 5 from the position at "N" Myrs ago to the present time (output file: part0001). This step is needed to set 3000 test particles with reasonable energy and angular momentum .
+You can edit 'frogin_central' for changing evolving time and time steps.
+
+
+4) make_pal5.idl
+
+This produces initial test particles based on the position of Pal 5 from 2).
+
+
+5) compile and run frog.f
+
+i) frog.f: main code to run
+
+ii) frog.h: define constants and parameters
+	edit "out_dir" if you want to specify the output directory
+
+iii) input files for frog.f
+
+* frogin: 
+- Line 1: The number of particles should match the number of lines of frog_Pal5.dat. 
+- Line 2: The number of steps*timestep is the age of Pal5 you want to see the evolution. For example, in the step 2), you compute the position of Pal 5 8440 Myr ago. If you set the number of steps as 8440*2=16880 and timestep 0.5 Myr, the result must be the current position of Pal 5 which is stored in frog_Pal5_present.dat
+- Line 3: timestep 0.5 Myr is determined to conserve energy and angular momentum. 1 Myr is also okay but I tried to be conservative.
+- Line 4: number of subhalos. This must match the number of lines of input subhalo list (e.g., frog_VLsubhalo.dat). 
+- Ignore line below 4. They are just my notes.
+
+* frog_Pal5.dat: contain initial test particle position, output of make_pal5.idl
+ 
+* frog_VLsubhalo.dat: list of subhalo position and velocity from Via Lactea 2.
+* frog_VLsubhalo_e5e6.dat: list of subhalo position and velocity between 10^5 and 10^6Msun from Via Lactea 2.
+* frog_VLsubhalo_inner.dat: list of subhalo position and velocity in the inner halo from Via Lactea 2.
+
+
+iv) output files from frog.f
+
+- part001: time, position, and velocity of Pal 5 (central particle).
+- part_peri: time, position, and velocity of the test particles at their pericenter.
+- snapshot/snap*****: time, position, and velocity of test particles in each step
+- snapshot_subhalo/snap*****: time, position, and velocity of subhalos in each step
+  
+6) figure1.idl
+
+produce Figure 1 of my 2011 paper. You may not need this.
+The result from N-body simulation used in Figure 1 of the paper is lost.
+
+
